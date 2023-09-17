@@ -15,6 +15,7 @@
       images: [],
       selectedImage: null,
       isLoading: false,
+      btnLoadMore: false,
     };
 
     handleQueryChange = (event) => {
@@ -62,6 +63,7 @@
         
         this.setState((prevState) => ({
           images: [...prevState.images, ...newImages],
+          btnLoadMore: newImages.length >= 12, 
         }));
       }
     } catch (error) {
@@ -95,7 +97,7 @@
             images={this.state.images}
             onImageClick={this.handleImageClick}
           />
-          {this.state.images.length > 11 && (
+          {this.state.images.length  !== 0 && this.state.btnLoadMore && (
             <Button onClick={this.handleLoadMore} />
           )}
           {this.state.isLoading && <CustomLoader />}
