@@ -26,6 +26,14 @@ class App extends Component {
     this.setState({ page: 1, images: [], isLoading: true, query });
   };
 
+  handleImageClick = (imageUrl) => {
+      this.setState({ selectedImage: imageUrl });
+  };
+  
+  handleCloseModal = () => {
+      this.setState({ selectedImage: null });
+    };
+
   componentDidUpdate(prevProps, prevState) {
     if (this.state.page !== prevState.page || this.state.query !== prevState.query) {
       this.fetchImagesData();
