@@ -4,10 +4,14 @@ import "react-toastify/dist/ReactToastify.css";
 import styles from "./Searchbar.module.css";
 
 class Searchbar extends Component {
-  handleSubmit = async (event) => {
-    event.preventDefault();
+  state = {
+    inputQuery: "", 
+  };
 
-    if (this.props.query.trim() === "") {
+  handleSubmit = async (event) => {
+    
+    event.preventDefault();
+    if (this.state.inputQuery.trim() === "") {
       toast.error("Please enter a search query.", {
         position: "top-right",
         autoClose: 3000,
@@ -16,7 +20,7 @@ class Searchbar extends Component {
     }
 
     try {
-      await this.props.onSubmit();
+       this.props.onSubmit(this.state.inputQuery); 
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while searching. Please try again later.", {
@@ -24,6 +28,10 @@ class Searchbar extends Component {
         autoClose: 3000,
       });
     }
+  };
+
+  handleInputChange = (event) => {
+    this.setState({ inputQuery: event.target.value });
   };
 
   render() {
@@ -36,8 +44,8 @@ class Searchbar extends Component {
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            value={this.props.query}
-            onChange={this.props.onQueryChange} 
+            value={this.state.inputQuery}
+            onChange={this.handleInputChange}
           />
 
           <button type="submit" className="button">
