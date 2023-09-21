@@ -1,17 +1,15 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "./Searchbar.module.css";
 
-class Searchbar extends Component {
-  state = {
-    inputQuery: "", 
-  };
+function Searchbar({ onSubmit }) {
+  const [inputQuery, setInputQuery] = useState(""); 
 
-  handleSubmit = async (event) => {
-    
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (this.state.inputQuery.trim() === "") {
+    
+    if (inputQuery.trim() === "") {
       toast.error("Please enter a search query.", {
         position: "top-right",
         autoClose: 3000,
@@ -20,7 +18,7 @@ class Searchbar extends Component {
     }
 
     try {
-       this.props.onSubmit(this.state.inputQuery); 
+      onSubmit(inputQuery);
     } catch (error) {
       console.error("Error:", error);
       toast.error("An error occurred while searching. Please try again later.", {
@@ -30,33 +28,31 @@ class Searchbar extends Component {
     }
   };
 
-  handleInputChange = (event) => {
-    this.setState({ inputQuery: event.target.value });
+  const handleInputChange = (event) => {
+    setInputQuery(event.target.value);
   };
 
-  render() {
-    return (
-      <header className={styles.searchbar}>
-        <form className="form" onSubmit={this.handleSubmit}>
-          <input
-            className="input"
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            value={this.state.inputQuery}
-            onChange={this.handleInputChange}
-          />
+  return (
+    <header className={styles.searchbar}>
+      <form className="form" onSubmit={handleSubmit}>
+        <input
+          className="input"
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          value={inputQuery}
+          onChange={handleInputChange}
+        />
 
-          <button type="submit" className="button">
-            <span>Search</span>
-          </button>
-        </form>
+        <button type="submit" className="button">
+          <span>Search</span>
+        </button>
+      </form>
 
-        <ToastContainer />
-      </header>
-    );
-  }
+      <ToastContainer />
+    </header>
+  );
 }
 
 export default Searchbar;

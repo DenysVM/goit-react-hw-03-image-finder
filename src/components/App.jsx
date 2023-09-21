@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import fetchImages from "../services/Api/Api";
 import Searchbar from "../components/Searchbar/Searchbar";
 import ImageGallery from "../components/ImageGallery/ImageGallery";
@@ -8,45 +8,45 @@ import CustomLoader from "../components/Loader/Loader";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-class App extends Component {
-  state = {
-    query: "",
-    page: 1,
-    images: [],
-    selectedImage: null,
-    isLoading: false,
-    btnLoadMore: false,
+function App() {
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [btnLoadMore, setBtnLoadMore] = useState(false);
+
+  const handleQueryChange = (query) => {
+    setQuery(query);
   };
 
-  handleQueryChange = (query) => {
-    this.setState({ query });
+  const handleSearch = (query) => {
+    setPage(1);
+    setImages([]);
+    setIsLoading(true);
+    setQuery(query);
   };
 
-  handleSearch = (query) => {
-    this.setState({ page: 1, images: [], isLoading: true, query });
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
   };
 
-  handleImageClick = (imageUrl) => {
-      this.setState({ selectedImage: imageUrl });
+  const handleCloseModal = () => {
+    setSelectedImage(null);
   };
-  
-  handleCloseModal = () => {
-      this.setState({ selectedImage: null });
-    };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.page !== prevState.page || this.state.query !== prevState.query) {
-      this.fetchImagesData();
-    }
-  }
+  const handleLoadMore = () => {
+    setPage(page + 1);
+    setIsLoading(true);
+  };
 
-  fetchImagesData = () => {
-    if (!this.state.query) return;
+  useEffect(() => {
+    if (!query) return;
 
-    this.setState({ isLoading: true });
+    setIsLoading(true);
 
     try {
-      fetchImages(this.state.query, this.state.page)
+      fetchImages(query, page)
         .then((newImages) => {
           if (newImages.length === 0) {
             toast.error("No images found for your search.", {
@@ -54,10 +54,8 @@ class App extends Component {
               autoClose: 3000,
             });
           } else {
-            this.setState((prevState) => ({
-              images: [...prevState.images, ...newImages],
-              btnLoadMore: newImages.length >= 12,
-            }));
+            setImages((prevImages) => [...prevImages, ...newImages]);
+            setBtnLoadMore(newImages.length >= 12);
           }
         })
         .catch((error) => {
@@ -67,46 +65,38 @@ class App extends Component {
           });
         })
         .finally(() => {
-          this.setState({ isLoading: false });
+          setIsLoading(false);
         });
     } catch (error) {
       console.error("Error:", error);
-      this.setState({ isLoading: false });
+      setIsLoading(false);
       throw error;
     }
-  };
+  }, [query, page]);
 
-  handleLoadMore = () => {
-  this.setState(
-    (prevState) => ({ page: prevState.page + 1, isLoading: true }),
-      );
-}
-
-  render() {
-    return (
-      <div>
-        <Searchbar
-          query={this.state.query}
-          onQueryChange={this.handleQueryChange}
-          onSubmit={this.handleSearch}
+  return (
+    <div>
+      <Searchbar
+        query={query}
+        onQueryChange={handleQueryChange}
+        onSubmit={handleSearch}
+      />
+      <ImageGallery
+        images={images}
+        onImageClick={handleImageClick}
+      />
+      {images.length !== 0 && btnLoadMore && (
+        <Button onClick={handleLoadMore} />
+      )}
+      {isLoading && <CustomLoader />}
+      {selectedImage && (
+        <Modal
+          image={selectedImage}
+          onClose={handleCloseModal}
         />
-        <ImageGallery
-          images={this.state.images}
-          onImageClick={this.handleImageClick}
-        />
-        {this.state.images.length !== 0 && this.state.btnLoadMore && (
-          <Button onClick={this.handleLoadMore} />
-        )}
-        {this.state.isLoading && <CustomLoader />}
-        {this.state.selectedImage && (
-          <Modal
-            image={this.state.selectedImage}
-            onClose={this.handleCloseModal}
-          />
-        )}
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 }
 
 export default App;
